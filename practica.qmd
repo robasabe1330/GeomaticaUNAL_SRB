@@ -1,0 +1,117 @@
+---
+title: "Práctica: Geoportales y Servicios Web"
+author: "Santiago Roddriguez Basabe"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    theme: cosmo
+  pdf:
+    toc: true
+    number-sections: true
+    colorlinks: true
+lang: es
+---
+
+# Introducción
+
+Esta práctica tiene como objetivo integrar datos locales y servicios remotos para validar la interoperabilidad de la información geográfica colombiana, utilizando tanto QGIS como ArcGIS Pro.
+
+# Tabla de Fuentes de Datos
+
+A continuación se presenta el detalle de las fuentes de información geográfica utilizadas en esta práctica:
+
+| Tipo | Nombre del Servicio/Archivo | URL o Ruta Local | Sistema de Coordenadas (EPSG) | Descripción |
+|------|----------------------------|------------------|-------------------------------|-------------|
+| WMS | IDECA | `(https://serviciosgis.catastrobogota.gov.co/arcgis/services/Mapa_Referencia/Mapa_Referencia/MapServer/WMSServer)` | EPSG:4326 | Límites de Bogotá D.C. con topónimo |
+| WFS | IDECA | `https://serviciosgis.catastrobogota.gov.co/arcgis/services/educacion/matricula/MapServer/WFSServer' version='auto` | EPSG:4326 | Breve descripción |
+| WCS | IDECA| `dpiMode=7&identifier=1&tilePixelRatio=0&url=https://serviciosgis.catastrobogota.gov.co/arcgis/services/imagenes/Ortho2017/MapServer/WCSServer` | EPSG:4326 | Ortofotoimagen de Bogotá 2017 |
+| Shapefile | IDECA | `https://datosabiertos.bogota.gov.co/en/dataset/colegios-bogota-d-c/resource/b2e46196-f801-4324-8be3-9e7d54266876` | EPSG:4326 | Inventario de colegios en Bogotá |
+| GeoTIFF | IDECA | `https://datosabiertos.bogota.gov.co/dataset/densidad-de-matriculados-en-colegios-oficiales-bogota-d-c` | EPSG:XXXX | Densidad de niños matriculados por colegio |
+
+: Fuentes de datos geográficos utilizados {#tbl-fuentes}
+
+# Productos Cartográficos
+
+## Mapa elaborado en QGIS
+
+![Mapa elaborado en QGIS mostrando la integración de servicios web y datos locales](C:\Users\Usuario\Documents\Santiago\UNAL\GeomaticaGeneral2026\CLASE\MapaQGIS.pdf){#fig-qgis}
+
+## Mapa elaborado en ArcGIS Pro
+
+![Mapa elaborado en ArcGIS Pro con las mismas fuentes de información] {#fig-arcgis}
+
+# Cuestionario de Análisis
+
+## 1. ¿Qué archivos/servicios permiten la edición de geometrías directamente?
+
+Los servicios y archivos que permiten edición directa de geometrías son:
+
+- **WFS (Web Feature Service)**: Permite modificación de simbología, así como la edición de geometrías de manera vectorial.
+- **Shapefile local**: Al estar alojado en las librerías locales, permite la edición de las geometrías vectoriales.
+- **GeoPackage**: Al estar alojado en las librerías locales, permite la edición de las geometrías vectoriales, si las contiene.
+
+**No permiten edición:**
+- **WMS**: Solo transmite imágenes renderizadas
+- **WCS**: Trabaja con coberturas raster
+- **GeoTIFF**: Formato raster, no tiene geometrías vectoriales editables
+
+## 2. ¿Cuáles permiten acceso a la tabla de atributos? Describa tres campos de uno de ellos
+
+Los servicios/archivos con acceso a tabla de atributos son:
+
+- **WFS**: ✓
+- **Shapefile**: ✓
+- **GeoPackage**: ✓
+
+### Descripción de campos del WFS:
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `object ID` | Numérico | Identificador |
+| `Nombre_Establecimiento_Educativo` | Texto | Nombre del colegio |
+| `Demanda_Cupos_-_Total` | Numérico | Cálculo de la demanda |
+
+: Campos de atributos {#tbl-campos}
+
+**Ejemplo de valores:**
+- Campo1: [ejemplo]
+- Campo2: [ejemplo]
+- Campo3: [ejemplo]
+
+## 3. ¿En qué casos fue posible cambiar la simbología desde el software cliente?
+
+La simbología pudo modificarse en:
+
+- **WFS**: Unicamente los filtros que se le puedan aplicar a la capa total
+- **Shapefile y GeoTIFF locales**: Sí permiten editarse en su totalidad. 
+- **WCS**: No permite editar paletas de color.
+
+**No fue posible en:**
+- **WMS**: Solo muestra imagen pre-renderizada por el servidor
+
+## 4. ¿Por qué es preferible usar un WFS sobre un Shapefile descargado en proyectos a largo plazo?
+
+1. **Actualización automática**: El WFS siempre muestra la versión más reciente de los datos sin necesidad de descargas manuales.
+
+2. **Almacenamiento eficiente**: No ocupa espacio en disco local, especialmente útil con datasets grandes.
+
+3. **Trabajo colaborativo**: Múltiples usuarios acceden a la misma fuente oficial sin duplicación de archivos.
+
+4. **Trazabilidad**: Se mantiene la conexión con la fuente oficial, facilitando la reproducibilidad científica.
+
+5. **Integridad de datos**: Reduce errores por versiones desactualizadas o modificaciones no controladas.
+
+6. **Cumplimiento Open Science**: Favorece la transparencia y reproducibilidad al usar fuentes públicas verificables.
+
+# Conclusiones
+
+La experiencia con WCS me parece subóptima debido a sus carencias en disponibilidad. Los demás representan opciones nuevas que desconocía. 
+
+# Referencias
+
+- Franco, R. (s.f.). *Geoservicios en Colombia*. Recuperado de https://rodolfofrancoweb.com/geodata/geoservicios-colombia/
+- Franco, R. (s.f.). *Geoportales y Datos Abiertos*. Recuperado de https://rodolfofrancoweb.com/sig/geoportales_datos_abiertos_e_ides/geoservicios/
+  
