@@ -1,0 +1,82 @@
+---
+title: "Análisis de Sistemas de Coordenadas en Colombia"
+author: "Santiago Rodriguez Basabe"
+format: html
+---
+---
+title: "Análisis de Sistemas de Referencia y Proyección en Colombia"
+author: "Santiago Basabe"
+format: html
+editor: visual
+---
+
+# 1. Sistema de Coordenadas Geográfico GCS_Bogota (EPSG:4218)
+
+**Nombre oficial:** GCS_Bogota  
+**Código EPSG:** 4218  
+**Tipo:** Sistema de Coordenadas Geográfico  
+**Datum:** D_Bogota  
+**Elipsoide:** International 1924  
+**Unidad angular:** Grado  
+**Meridiano de referencia:** Greenwich  
+
+## Descripción
+
+El sistema GCS_Bogota (EPSG:4218) corresponde a un sistema de coordenadas geográfico, definido en términos de latitud y longitud expresadas en grados. No incorpora proyección cartográfica, por lo que las posiciones se describen directamente sobre el elipsoide de referencia.
+
+Este sistema se fundamenta en el Datum Bogotá (D_Bogota), el cual fue materializado en Colombia mediante la Antigua Red Nacional (ARENA). En consecuencia, existe una relación geodésica directa entre este sistema y ARENA.
+
+No está relacionado con el marco de referencia MAGNA-SIRGAS y no corresponde a un sistema geocéntrico.
+
+---
+
+# 2. Sistema de Coordenadas Proyectado Colombia Bogota Zone (EPSG:21897)
+
+**Nombre oficial:** Colombia Bogota Zone  
+**Código EPSG:** 21897  
+**Tipo:** Sistema de Coordenadas Proyectado  
+**Proyección:** Transverse Mercator  
+**Datum:** D_Bogota  
+**Unidad lineal:** Metro  
+**Falso Este:** 1 000 000 m  
+**Falso Norte:** 1 000 000 m  
+**Meridiano central:** -74.0809166667  
+**Latitud de origen:** 4.5990472222  
+
+## Descripción
+
+El sistema Colombia Bogota Zone (EPSG:21897) es un sistema proyectado que emplea la proyección Transverse Mercator para transformar coordenadas geográficas en coordenadas planas expresadas en metros.
+
+Se encuentra definido sobre el Datum Bogotá (D_Bogota), el cual fue materializado mediante la Antigua Red Nacional (ARENA). Por lo tanto, su relación con ARENA es indirecta pero estructural, al depender del datum que dicha red materializa.
+
+Este sistema no pertenece al marco MAGNA-SIRGAS y corresponde al denominado “Origen Bogotá” dentro del sistema clásico colombiano previo a la modernización geodésica nacional.
+
+Es importante distinguir conceptualmente:
+
+- ARENA: red geodésica física.
+- Datum Bogotá: modelo matemático de referencia.
+- EPSG:21897: sistema proyectado que utiliza dicho datum.
+
+---
+
+# 3. Principales Sistemas de Coordenadas Relacionados con Colombia
+
+| Nombre del Sistema | Tipo | Datum | Proyección | EPSG | Observaciones |
+|--------------------|------|-------|------------|------|--------------|
+| GCS Bogotá | Geográfico | D_Bogota | No aplica | 4218 | Basado en datum materializado por ARENA |
+| Colombia Bogota Zone | Proyectado | D_Bogota | Transverse Mercator | 21897 | Origen Bogotá del sistema clásico |
+| MAGNA-SIRGAS | Geográfico | MAGNA-SIRGAS | No aplica | 4686 | Marco geocéntrico oficial vigente |
+| MAGNA Colombia Bogotá | Proyectado | MAGNA-SIRGAS | Transverse Mercator | 3116 | Proyección oficial sobre MAGNA |
+| MAGNA-SIRGAS / Origen Único Nacional | Proyectado | MAGNA-SIRGAS | Transverse Mercator | 9377 | Sistema oficial actual con OÚN |
+
+---
+
+# Consideraciones Finales
+
+Los sistemas EPSG:4218 y EPSG:21897 se fundamentan en el Datum Bogotá, materializado mediante la Antigua Red Nacional (ARENA), y corresponden al esquema geodésico clásico colombiano.
+
+La adopción de MAGNA-SIRGAS implicó la transición hacia un marco de referencia geocéntrico compatible con estándares internacionales (ITRF), culminando en la implementación del Origen Único Nacional (EPSG:9377) como sistema oficial vigente.
+
+---
+
+#
