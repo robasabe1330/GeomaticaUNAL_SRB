@@ -1,0 +1,61 @@
+
+---
+title: "Tarea 3: Conversión e Interoperabilidad de Datos Espaciales"
+author: "Santiago Rodríguez Basabe"
+date: today
+lang: es
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    theme: cosmo
+    fontsize: 1.05em
+---
+
+## Introducción
+
+En esta práctica se desarrolló un flujo de trabajo para la conversión, transformación y carga de datos espaciales entre distintos formatos y plataformas. Los ejercicios permitieron comprender las implicaciones del uso de diferentes sistemas de coordenadas, así como aplicar un proceso básico de **ETL espacial** (Extract, Transform, Load) para almacenar información geográfica en una base de datos PostGIS.
+
+---
+
+## Ejercicio 1: Sistemas de Coordenadas
+
+Intentar abrir un archivo KML que contiene coordenadas planas (expresadas en metros) en Google Earth produce una ubicación incorrecta de las geometrías. Esto ocurre porque el formato **KML** está diseñado para trabajar exclusivamente con coordenadas geográficas en el sistema de referencia **WGS84**, expresadas en latitud y longitud en grados decimales.
+
+Si un archivo contiene coordenadas proyectadas —por ejemplo en UTM u otro sistema de referencia espacial cuyas unidades son metros— Google Earth las interpretará erróneamente como si fueran coordenadas geográficas. Como resultado, los objetos aparecerán desplazados o ubicados en posiciones incorrectas dentro del globo virtual.
+
+Por esta razón se afirma que Google Earth no realiza **proyección al vuelo**. A diferencia de los sistemas de información geográfica de escritorio como **QGIS** o **ArcGIS**, este visor no ejecuta transformaciones automáticas entre sistemas de referencia espacial distintos. En consecuencia, los datos deben ser previamente transformados a **WGS84** antes de ser visualizados en el entorno KML/KMZ, como se realizó durante el ejercicio utilizando herramientas de reproyección en QGIS y ArcGIS.
+
+---
+
+## Ejercicio 2: Eficiencia en el Proceso ETL
+
+Para el proceso de filtrado planteado en el ejercicio, resulta más eficiente aplicar primero el **filtro por atributos** y posteriormente el **filtro espacial**.
+
+El filtrado por nombre implica únicamente evaluar una condición sobre una variable de texto en la tabla de atributos. Este tipo de operación es computacionalmente simple y tiene un bajo costo en términos de memoria y procesamiento. Al eliminar desde el inicio los registros que no cumplen la condición establecida, se reduce el número de entidades que deberán ser evaluadas en las operaciones posteriores.
+
+Por el contrario, las operaciones espaciales —como la evaluación de intersecciones entre geometrías o la comparación con buffers— requieren cálculos geométricos más complejos y consumen más recursos computacionales. Si estas operaciones se ejecutaran sobre la totalidad de los datos originales, el sistema tendría que procesar un mayor número de geometrías.
+
+En consecuencia, aplicar primero el filtro de atributos permite **reducir el volumen de datos** que participa en el análisis espacial, optimizando así el uso de memoria y el tiempo de procesamiento dentro del flujo ETL.
+
+---
+
+## Interoperabilidad entre QGIS y PostGIS
+
+Durante el proceso de carga de datos en PostgreSQL/PostGIS se observaron algunas limitaciones relacionadas con la estructura de la base de datos, particularmente en el manejo de esquemas y la creación de tablas espaciales.
+
+En ciertos entornos, herramientas como **ArcGIS Pro** pueden imponer restricciones en la gestión de esquemas o en la forma en que se crean y registran las geometrías dentro de PostgreSQL. Estas limitaciones pueden dificultar la importación directa de datos o requerir configuraciones adicionales.
+
+En este contexto, **QGIS** funciona eficazmente como una herramienta de interoperabilidad entre diferentes plataformas SIG. Su soporte nativo para PostgreSQL/PostGIS permite exportar capas directamente como tablas espaciales dentro de un esquema específico, conservando correctamente la geometría, el sistema de referencia espacial y la estructura de atributos.
+
+Además, QGIS facilita la realización de transformaciones de coordenadas y operaciones ETL previas a la carga, lo que lo convierte en una herramienta flexible para el intercambio de datos entre distintos entornos de análisis geoespacial.
+
+---
+
+## Conclusiones
+
+El desarrollo de la práctica permitió comprender la importancia de gestionar adecuadamente los sistemas de referencia espacial al intercambiar datos geográficos entre diferentes plataformas. Asimismo, se evidenció cómo la aplicación estratégica de filtros dentro de un flujo ETL puede optimizar el uso de recursos computacionales.
+
+Aunque aún existen dudas respecto al proceso de exportación directa de capas hacia PostgreSQL/PostGIS, la experiencia permitió reconocer el potencial de estas herramientas para la gestión de bases de datos espaciales. En particular, se destaca el papel de QGIS como un puente de interoperabilidad que facilita la integración de datos geográficos provenientes de distintos formatos y sistemas.
+```
