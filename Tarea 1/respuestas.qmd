@@ -1,0 +1,70 @@
+---
+title: "Taller 1 — Visualización y mapas dinámicos"
+author: "Santiago Rodríguez Basabe"
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: false
+    embed-resources: true
+  pdf:
+    toc: true
+    number-sections: true
+lang: es
+editor: visual
+---
+
+# Introducción
+
+En este taller se presenta una breve reflexión sobre las herramientas de visualización geoespacial trabajadas en clase, tanto para cartografía estática como para mapas interactivos. Además, se incluye una exploración adicional en Python con una funcionalidad distinta a las vistas durante la sesión, con el fin de reconocer el potencial del ecosistema OpenGeos para análisis y comunicación cartográfica.
+
+# Parte B — Desafío de exploración
+
+Para esta sección se eligió **leafmap**, implementando una visualización de **pantalla dividida** (*split-panel map*). Esta funcionalidad es útil porque permite comparar dos fondos cartográficos o dos capas espaciales de manera inmediata, algo especialmente valioso en ejercicios de monitoreo, validación visual y comunicación de cambios territoriales.
+
+```{python}
+import leafmap
+
+# Crear mapa centrado en Colombia
+m = leafmap.Map(center=[4.5, -74.1], zoom=6)
+
+# Comparación de dos mapas base en pantalla dividida
+m.split_map(
+    left_layer="OpenTopoMap",
+    right_layer="Esri.WorldImagery"
+)
+
+m
+```
+
+La utilidad principal de esta herramienta es que facilita comparar rápidamente información topográfica e imagen satelital sin necesidad de activar y desactivar capas manualmente. En contextos aplicados, esto puede servir para reconocer coberturas, verificar rasgos del relieve o apoyar procesos de fotointerpretación preliminar.
+
+# Preguntas de análisis
+
+## 1. Facilidad e intuición
+
+De las herramientas revisadas, la que me parece más intuitiva para una persona que nunca ha programado es **leafmap**. Su lógica de uso es bastante directa: se crea un objeto de mapa, se añaden capas y el resultado se visualiza casi inmediatamente. En comparación, librerías como `geemap` requieren comprender mejor la lógica de Google Earth Engine, mientras que `geopandas` y las herramientas de R para cartografía estática exigen una mayor atención a estructuras de datos, simbología y configuración del gráfico.
+
+Además, leafmap tiene una ventaja importante: el resultado es visible de manera muy rápida y con pocos comandos. Esa inmediatez reduce la frustración inicial de quien está empezando y permite concentrarse primero en la lógica espacial antes que en detalles técnicos más complejos.
+
+## 2. Calidad cartográfica
+
+Para la entrega de un informe técnico en PDF, considero que **ggplot2** suele ofrecer el mejor acabado visual entre las opciones mencionadas, especialmente cuando se busca un producto limpio, controlado y publicable. Su principal fortaleza está en el manejo detallado de la estética: tipografías, leyendas, escalas, jerarquía visual y composición general.
+
+Sin embargo, **tmap** también es una opción muy sólida para cartografía temática porque fue pensado específicamente para mapas y facilita incorporar elementos cartográficos de manera más natural, como escalas, brújulas y diseños más cercanos a una salida profesional. Por su parte, `matplotlib` a través de `geopandas.plot()` es útil y rápido, pero normalmente produce salidas más básicas y con menor refinamiento visual si no se hace una edición adicional.
+
+En ese sentido, si la prioridad fuera rapidez con buena presentación, elegiría **tmap**; si la prioridad fuera el mayor control estético posible para una figura final de informe o artículo, elegiría **ggplot2**.
+
+## 3. Potencial de la documentación
+
+Al revisar el ecosistema de OpenGeos, una funcionalidad avanzada que me parece especialmente útil es la posibilidad de hacer **comparaciones interactivas de capas** y construir visores ligeros para exploración rápida. En particular, herramientas como el **split-panel** de leafmap o la integración sencilla de datasets remotos en geemap pueden ser muy valiosas para trabajos de monitoreo ambiental y análisis multitemporal.
+
+Para un trabajo final o una investigación, esto sería útil porque permite contrastar imágenes, coberturas o productos derivados sin depender de software de escritorio en cada etapa. También puede ser una herramienta de apoyo para mostrar resultados a otras personas que no necesariamente manejan SIG avanzados, pero sí necesitan interpretar patrones espaciales de forma clara.
+
+## 4. Elección de herramientas
+
+Si tuviera que atender una emergencia ambiental real y desplegar un visor web en menos de cinco minutos para que personal no técnico visualice una inundación, elegiría **leafmap**. La razón principal es su rapidez de implementación, su curva de aprendizaje relativamente baja y la facilidad con la que permite montar un mapa interactivo entendible con muy pocas líneas de código. Además, ofrece una interfaz visual suficientemente clara para usuarios no especializados y permite integrar capas base o resultados vectoriales de forma casi inmediata.
+
+# Conclusión
+
+Las librerías revisadas muestran que la visualización geoespacial actual combina dos necesidades complementarias: por un lado, la producción de mapas estáticos con calidad técnica y cartográfica; por otro, la generación de visores interactivos que faciliten exploración, validación y comunicación rápida. En este panorama, el ecosistema OpenGeos resulta especialmente valioso porque reduce barreras técnicas y acelera la construcción de productos útiles tanto en contextos académicos como aplicados.
