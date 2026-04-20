@@ -1,0 +1,246 @@
+---
+title: "Procesamiento hidrológico y análisis comparativo de algoritmos en la Cuenca del río Guacavía"
+subtitle: "Trabajo académico de geomática"
+author:
+  - "Valentina Ramírez"
+  - "Gabriela Caro"
+  - "Andrés Posada"
+  - "Santiago Rodríguez"
+date: today
+lang: es
+toc: true
+toc-depth: 3
+number-sections: true
+format:
+  html:
+    theme: none
+    css: styles.css
+    toc: true
+    number-sections: true
+    fig-cap-location: bottom
+    smooth-scroll: true
+  pdf:
+    toc: true
+    number-sections: true
+    fig-cap-location: bottom
+    fig-pos: "H"
+    geometry:
+      - top=2.7cm
+      - bottom=2.7cm
+      - left=2.7cm
+      - right=2.7cm
+    fontsize: 11pt
+    linestretch: 1.15
+header-includes:
+  - \usepackage{float}
+execute:
+  echo: false
+  warning: false
+  message: false
+  enabled: false
+---
+
+# Introducción
+
+El análisis geomorfométrico basado en Modelos Digitales de Elevación (MDE) constituye una herramienta fundamental para la caracterización espacial del relieve y de los procesos hidrológicos en cuencas hidrográficas. A partir de un MDE es posible derivar variables que representan trayectorias de flujo, organización del drenaje, conectividad topográfica y geometría local de la superficie terrestre.
+
+El presente trabajo se estructuró en dos componentes complementarios. El primero corresponde al procesamiento hidrológico y morfométrico de la **Cuenca del río Guacavía**, a partir de un MDE SRTM de 30 m. El segundo está orientado al análisis comparativo de algoritmos mediante la ejecución paralela de variables seleccionadas en distintos motores de geoprocesamiento.
+
+El documento se plantea como una entrega única, en la cual el **Punto 1** presenta el flujo principal de acondicionamiento y derivación de variables, mientras que el **Punto 2** desarrolla el ejercicio comparativo entre herramientas de análisis raster dentro de QGIS.
+
+# Área de estudio
+
+La **Cuenca del río Guacavía** se localiza en el departamento del Meta, Colombia, y presenta una configuración alargada con orientación general occidente–oriente. Desde el punto de vista geomorfológico, la cuenca integra dos dominios contrastantes: un sector occidental de cabeceras montañosas, con mayores gradientes topográficos y fuerte disección del relieve, y un sector central-oriental de superficies más suaves, correspondiente a la transición hacia el piedemonte llanero.
+
+Esta disposición espacial favorece el análisis hidrológico, ya que permite observar la concentración progresiva del drenaje desde zonas de aporte en cabecera hasta corredores fluviales principales en cotas inferiores.
+
+# Punto 1. Procesamiento hidrológico y morfométrico
+
+## Objetivo
+
+Aplicar un flujo de procesamiento hidrológico y geomorfométrico sobre un MDE de la Cuenca del río Guacavía, con el fin de derivar variables espaciales que permitan interpretar la estructura del drenaje y la organización del relieve.
+
+## Datos de entrada
+
+Se empleó un Modelo Digital de Elevación **SRTM de 30 m** descargado mediante Google Earth Engine para el polígono correspondiente a la cuenca de estudio. Posteriormente, el raster fue reproyectado al sistema de referencia **MAGNA-SIRGAS / Origen Nacional (EPSG:9377)** y recortado al límite hidrográfico de la cuenca.
+
+El acondicionamiento inicial incluyó la corrección de sumideros mediante la herramienta **Fill**, con el propósito de asegurar continuidad topológica en la simulación del drenaje superficial.
+
+## Script de descarga en Google Earth Engine
+
+A continuación se presenta el script utilizado para la extracción del MDE:
+
+```{javascript}
+var cuenca = table;
+
+var dem = ee.Image('USGS/SRTMGL1_003');
+var dem_clip = dem.clip(cuenca);
+
+Map.centerObject(cuenca, 11);
+Map.addLayer(dem_clip, {min: 500, max: 3500}, 'DEM SRTM');
+
+Export.image.toDrive({
+  image: dem_clip,
+  description: 'DEM_SRTM_Guacavia',
+  folder: 'GEE_exports',
+  fileNamePrefix: 'dem_srtm_guacavia',
+  region: cuenca.geometry(),
+  scale: 30,
+  crs: 'EPSG:4326',
+  maxPixels: 1e13
+});
+```
+
+## Flujo metodológico
+
+El flujo general de trabajo desarrollado en entorno SIG se resume en la siguiente secuencia operativa:
+
+![Flujo metodológico del procesamiento aplicado a la Cuenca del río Guacavía.](figs/flujometodologico.png){#fig-flujo fig-align="center" width="100%" fig-pos="H"}
+
+El procedimiento inició con la descarga del Modelo Digital de Elevación SRTM mediante Google Earth Engine. Posteriormente, el raster fue reproyectado al sistema de referencia MAGNA-SIRGAS / Origen Nacional (EPSG:9377), recortado al límite de la cuenca y acondicionado hidrológicamente mediante la herramienta **Fill**. Finalmente, se generaron las variables derivadas y se realizó la exportación cartográfica de los resultados.
+
+## Variables derivadas
+
+A partir del MDE acondicionado se obtuvieron las siguientes cinco variables:
+
+1. **Flow Accumulation**
+2. **Flow Direction**
+3. **Flow Distance**
+4. **Flow Length**
+5. **Curvature**
+
+Estas variables fueron seleccionadas por su capacidad para describir la conectividad del drenaje, la organización de trayectorias de escorrentía y la geometría local del relieve.
+
+# Resultados
+
+## Acumulación de flujo
+
+![Acumulación de flujo en la Cuenca del río Guacavía.](figs/flowaccumulation.png){#fig-flowacc fig-align="center" width="100%" fig-pos="H"}
+
+La acumulación de flujo permitió identificar los principales corredores de concentración de escorrentía dentro de la cuenca. El patrón espacial obtenido muestra una red longitudinal bien definida, acompañada por tributarios secundarios que convergen desde sectores de cabecera hacia el eje principal del drenaje. Los valores máximos se concentran sobre el cauce principal, mientras que valores intermedios representan cauces de menor jerarquía.
+
+Desde un punto de vista geomorfológico, esta variable evidencia una estructura de drenaje organizada y coherente con la forma alargada de la cuenca, así como con el fuerte gradiente topográfico que se desarrolla desde el occidente montañoso hacia las zonas más bajas.
+
+## Dirección de flujo
+
+![Dirección de flujo en la Cuenca del río Guacavía.](figs/flowdirection.png){#fig-flowdir fig-align="center" width="100%" fig-pos="H"}
+
+La dirección de flujo representa la trayectoria preferencial que seguiría el agua desde cada celda del terreno en función del gradiente topográfico local. En la cuenca del río Guacavía se observa un patrón denso y jerarquizado en las cabeceras occidentales, donde la disección del relieve genera múltiples trayectorias convergentes.
+
+A medida que el drenaje progresa hacia el centro y oriente de la cuenca, el patrón se hace más longitudinal y canalizado. Esta variable constituye un insumo metodológico fundamental para la derivación de otras métricas hidrológicas, aunque también permite interpretar la organización espacial de la escorrentía.
+
+## Distancia de flujo
+
+![Distancia de flujo en la Cuenca del río Guacavía.](figs/flowdistance.png){#fig-flowdist fig-align="center" width="100%" fig-pos="H"}
+
+La distancia de flujo expresa la separación funcional entre cada celda y la red de drenaje modelada. Los mayores valores se localizan en divisorias topográficas y sectores elevados del occidente de la cuenca, donde la escorrentía debe recorrer trayectorias más extensas antes de alcanzar un cauce definido.
+
+Por el contrario, los valores bajos predominan en zonas cercanas a canales y fondos de valle. La distribución observada confirma que las cabeceras concentran superficies relativamente más desconectadas del drenaje principal, mientras que los sectores medios y bajos presentan mayor integración hidrológica.
+
+## Longitud de flujo
+
+![Longitud de flujo en la Cuenca del río Guacavía.](figs/flowlength.png){#fig-flowlen fig-align="center" width="100%" fig-pos="H"}
+
+La longitud de flujo muestra la extensión acumulada de las trayectorias hidrológicas dentro del sistema de drenaje. En este caso, los valores máximos se concentran sobre el cauce principal y algunos tributarios mayores, siguiendo un eje longitudinal que atraviesa la cuenca desde el sector central hacia el oriente.
+
+Esta variable resulta especialmente útil para aproximaciones relacionadas con conectividad hídrica, estructura del drenaje y tiempos relativos de concentración. Su distribución espacial refuerza la idea de una cuenca con fuerte control longitudinal en la organización del flujo.
+
+## Curvatura
+
+![Curvatura en la Cuenca del río Guacavía.](figs/curvature.png){#fig-curvature fig-align="center" width="100%" fig-pos="H"}
+
+La curvatura permitió identificar cambios locales en la geometría del relieve, distinguiendo superficies convexas, cóncavas y áreas de transición. Los contrastes más notorios se concentran en el sector occidental de la cuenca, donde el relieve es más abrupto y disectado, y donde por tanto la variabilidad geomorfológica es mayor.
+
+En la porción central y oriental predominan valores cercanos a la neutralidad relativa, en concordancia con superficies más suaves y homogéneas. Aunque su representación visual es más compleja que la de otras variables, la curvatura aporta información importante sobre la organización microgeomorfológica del terreno.
+
+# Discusión
+
+En conjunto, los resultados obtenidos reflejan una relación estrecha entre la estructura topográfica y la organización hidrológica de la Cuenca del río Guacavía. Las cabeceras occidentales concentran mayores contrastes morfológicos, mayor densidad de trayectorias de flujo y mayor complejidad geométrica del relieve. En contraste, hacia el centro y oriente de la cuenca se observa una progresiva simplificación de la topografía y una concentración más clara del drenaje en corredores principales.
+
+Las variables hidrológicas derivadas del MDE no solo permiten describir la red de drenaje potencial, sino también reconocer diferencias funcionales entre divisorias, laderas, fondos de valle y cauces estructurantes. Por su parte, la curvatura aporta una dimensión geomorfológica adicional al análisis, al capturar variaciones locales que no son evidentes únicamente con variables de conectividad.
+
+En términos metodológicos, el uso de un MDE acondicionado mediante corrección de sumideros fue indispensable para garantizar coherencia en la simulación del flujo superficial y consistencia en las variables posteriores.
+
+# Punto 2. Análisis comparativo de algoritmos
+
+## Objetivo
+
+Comparar los resultados obtenidos para variables derivadas del MDE mediante dos motores de geoprocesamiento distintos dentro de QGIS, con el fin de identificar diferencias metodológicas, visuales e interpretativas asociadas a cada implementación.
+
+## Metodología comparativa
+
+Para este segundo componente se seleccionaron dos tipos de variables topográficas derivadas a partir del MDE previamente acondicionado: la **pendiente y orientación de la pendiente** y el **índice de rugosidad del terreno (TRI)**. Antes de su cálculo, el modelo digital de elevación fue sometido a un proceso de corrección hidrológica mediante la herramienta **Fill Sinks (Wang & Liu)** de **SAGA Next Gen**, con el propósito de eliminar depresiones espurias y asegurar mayor consistencia en las derivaciones posteriores.
+
+![Modelo digital de elevación acondicionado mediante la herramienta Fill Sinks.](figs/fill.png){#fig-fill2 fig-align="center" width="85%" fig-pos="H"}
+
+Posteriormente, se ejecutaron los algoritmos en distintos motores dentro de QGIS. Para la pendiente se utilizó la herramienta **SAGA Next Gen -> Terrain Analysis -> Slope**, mientras que para la orientación de la pendiente se empleó **GRASS -> Raster (r.*) -> r.slope.aspect**. En el caso de la rugosidad, se compararon los resultados generados por **SAGA Next Gen -> Terrain Analysis -> Terrain Ruggedness Index (TRI)** y **GRASS -> r.tri**.
+
+## Pendiente y orientación de la pendiente
+
+La **pendiente** (*Slope*) es uno de los parámetros topográficos más básicos y utilizados en análisis espacial. Representa la inclinación del terreno en cada punto, expresada generalmente en grados o en porcentaje. En términos simples, indica qué tan empinado es el terreno en una localización específica. Se trata de una variable fundamental porque influye directamente en la velocidad de la escorrentía superficial, en la erosión del suelo, en la estabilidad de laderas y en la distribución de la vegetación.
+
+La pendiente se calcula a partir del cambio máximo de elevación entre una celda central y sus vecinas inmediatas, normalmente en una ventana de 3 × 3. En QGIS, una de las implementaciones más utilizadas corresponde a **SAGA Next Gen**, que aplica el método de **Horn (1981)**, ampliamente difundido en análisis geomorfométrico por su robustez y precisión.
+
+Desde una perspectiva aplicada, las pendientes bajas suelen asociarse con zonas de acumulación relativa de agua y menor velocidad de flujo, mientras que las pendientes altas favorecen escorrentía rápida, erosión más intensa y, en algunos contextos, mayor susceptibilidad a movimientos en masa.
+
+La **orientación de la pendiente** (*Aspect*) expresa la dirección cardinal hacia la que mira la ladera. Se representa en grados azimutales, donde 0° o 360° corresponden al norte, 90° al este, 180° al sur y 270° al oeste. Esta variable se obtiene frecuentemente mediante **GRASS r.slope.aspect**, herramienta que genera simultáneamente la pendiente y el aspecto.
+
+La importancia del *aspect* radica en que controla parte del microclima de las laderas, al influir en la radiación solar incidente, la humedad del suelo, la evaporación y, en consecuencia, en la cobertura vegetal y en ciertos usos potenciales del terreno. Aunque su efecto depende de la latitud y del contexto climático, sigue siendo una variable interpretativamente valiosa en estudios ambientales y geomorfológicos.
+
+### Comparación visual e interpretativa
+
+La salida de **SAGA** para la pendiente presenta una imagen continua, limpia y con contrastes marcados en las zonas de mayor inclinación. Esto facilita la lectura de divisorias, laderas abruptas y transiciones topográficas fuertes.
+
+Por su parte, la salida de **GRASS** para *aspect* permite distinguir la orientación espacial de las laderas, mostrando con claridad la distribución de direcciones del relieve dentro de la cuenca.
+
+::: {#fig-comp-pendiente layout-ncol=2}
+
+![Mapa de pendiente generado con SAGA Next Gen.](figs/pendientesaga.png){fig-align="center" width="100%"}
+
+![Mapa de orientación de la pendiente (aspect) generado con GRASS.](figs/pendientegrass.png){fig-align="center" width="100%"}
+
+Comparación entre la pendiente derivada con SAGA Next Gen y la orientación de ladera derivada con GRASS.
+:::
+
+En términos comparativos, ambas herramientas no producen exactamente la misma variable, pero sí conforman un conjunto analítico complementario: mientras la pendiente informa sobre la intensidad del gradiente topográfico, el *aspect* aporta información sobre la dirección de exposición de las laderas. Su uso conjunto resulta especialmente útil en estudios de erosión, hidrología, hábitat y ordenamiento del territorio.
+
+## Índice de rugosidad del terreno (TRI)
+
+El **Terrain Ruggedness Index (TRI)** es una medida cuantitativa de la irregularidad topográfica derivada de un MDE. Fue propuesto por **Riley et al. (1999)** como una forma de representar numéricamente qué tan accidentado o heterogéneo es el relieve. A diferencia de la pendiente, que resume el gradiente dominante, el TRI se enfoca en las diferencias de elevación entre una celda y sus ocho vecinas, capturando así el nivel de “quebramiento” del terreno a escala local.
+
+En su formulación clásica, el TRI se calcula como la raíz cuadrada de la suma de los cuadrados de las diferencias entre la elevación de la celda central y las elevaciones vecinas. Valores bajos indican superficies planas o suavemente onduladas, mientras que valores altos corresponden a relieves abruptos, escarpados o fuertemente diseccionados.
+
+Esta variable es útil para describir heterogeneidad topográfica y suele emplearse en estudios geomorfológicos, ecológicos e hidrológicos. Sin embargo, debe tenerse en cuenta que con frecuencia presenta correlación con la pendiente, especialmente en relieves montañosos.
+
+### Comparación entre implementaciones
+
+En este ejercicio se calcularon productos de rugosidad mediante **SAGA Next Gen** y **GRASS**. Ambas herramientas permiten identificar sectores de relieve más abrupto dentro de la cuenca, aunque pueden diferir en el detalle visual, en el rango de salida y en la manera en que sintetizan las diferencias altitudinales locales.
+
+::: {#fig-comp-tri layout-ncol=2}
+
+![Rugosidad del terreno calculada con SAGA Next Gen.](figs/rugosidadsaga.png){fig-align="center" width="100%"}
+
+![Rugosidad del terreno calculada con GRASS.](figs/rugosidadgrass.png){fig-align="center" width="100%"}
+
+Comparación del índice de rugosidad del terreno (TRI) obtenido con SAGA Next Gen y GRASS.
+:::
+
+De manera general, el TRI generado por ambos motores permite reconocer con claridad las zonas de mayor complejidad morfológica, especialmente en sectores de cabecera y áreas con mayor disección del relieve. Las diferencias observadas entre salidas pueden atribuirse a la implementación específica del algoritmo en cada motor, así como a los criterios de vecindad, escalamiento o tratamiento numérico usados internamente por cada herramienta.
+
+## Discusión comparativa
+
+La comparación entre motores de geoprocesamiento muestra que, aun cuando las variables derivadas responden a conceptos geomorfológicos equivalentes, los resultados pueden variar en términos de textura visual, contraste, rango numérico y legibilidad cartográfica. Esto es relevante porque evidencia que la elección del motor no es completamente neutra: influye tanto en la representación final como en la interpretación analítica de la variable.
+
+En el caso de la pendiente y el *aspect*, la principal fortaleza del ejercicio radica en la complementariedad entre intensidad y dirección del relieve. En el caso del TRI, la comparación permite constatar que la rugosidad constituye una propiedad distinta de la pendiente, aunque estrechamente relacionada con ella en terrenos montañosos.
+
+Desde una perspectiva metodológica, este segundo componente refuerza la necesidad de documentar con precisión las herramientas utilizadas en el procesamiento raster, ya que diferencias aparentemente menores entre algoritmos pueden traducirse en productos cartográficos e interpretaciones diferentes.
+
+## Síntesis del punto 2
+
+El análisis comparativo permitió incorporar una dimensión metodológica adicional al trabajo, al evaluar cómo distintos motores de geoprocesamiento implementan variables topográficas derivadas a partir de un mismo MDE. En conjunto, el ejercicio no solo complementa el procesamiento hidrológico desarrollado en el Punto 1, sino que también aporta criterios para una selección más informada de herramientas en análisis geomorfométrico.
+
+# Conclusiones
+
+El procesamiento hidrológico y morfométrico de la Cuenca del río Guacavía permitió derivar un conjunto de variables útiles para interpretar la organización del drenaje y la estructura del relieve. La acumulación, dirección, distancia y longitud de flujo evidenciaron una red hídrica jerarquizada, controlada por el contraste entre cabeceras montañosas y superficies más suaves aguas abajo. Por su parte, la curvatura permitió reconocer patrones locales de variación geomorfológica.
+
+En conjunto, el ejercicio confirma la utilidad de los MDE como insumo base para análisis espaciales de cuencas hidrográficas y establece una base metodológica adecuada para la comparación entre motores de geoprocesamiento.
