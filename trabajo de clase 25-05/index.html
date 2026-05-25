@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Santiago Rodriguez Basabe">
+
+<title>Flujos de trabajo desde ArcGIS Pro hacia ArcGIS Online y creación de una aplicación web</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="index_files/libs/clipboard/clipboard.min.js"></script>
+<script src="index_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="index_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="index_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="index_files/libs/quarto-html/popper.min.js"></script>
+<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="index_files/libs/quarto-html/anchor.min.js"></script>
+<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="index_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="index_files/libs/bootstrap/bootstrap-4d7f0bce1131f3e5f9547cd857cfbfc8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#introducción" id="toc-introducción" class="nav-link active" data-scroll-target="#introducción"><span class="header-section-number">1</span> Introducción</a></li>
+  <li><a href="#objetivo-del-trabajo" id="toc-objetivo-del-trabajo" class="nav-link" data-scroll-target="#objetivo-del-trabajo"><span class="header-section-number">2</span> Objetivo del trabajo</a></li>
+  <li><a href="#preparación-del-proyecto-en-arcgis-pro" id="toc-preparación-del-proyecto-en-arcgis-pro" class="nav-link" data-scroll-target="#preparación-del-proyecto-en-arcgis-pro"><span class="header-section-number">3</span> Preparación del proyecto en ArcGIS Pro</a></li>
+  <li><a href="#configuración-cartográfica-y-sistema-de-referencia" id="toc-configuración-cartográfica-y-sistema-de-referencia" class="nav-link" data-scroll-target="#configuración-cartográfica-y-sistema-de-referencia"><span class="header-section-number">4</span> Configuración cartográfica y sistema de referencia</a></li>
+  <li><a href="#publicación-de-servicios-web" id="toc-publicación-de-servicios-web" class="nav-link" data-scroll-target="#publicación-de-servicios-web"><span class="header-section-number">5</span> Publicación de servicios web</a>
+  <ul class="collapse">
+  <li><a href="#capa-operativa-hosted-feature-layer" id="toc-capa-operativa-hosted-feature-layer" class="nav-link" data-scroll-target="#capa-operativa-hosted-feature-layer"><span class="header-section-number">5.1</span> Capa operativa: Hosted Feature Layer</a></li>
+  <li><a href="#cartografía-base-vector-tile-layer" id="toc-cartografía-base-vector-tile-layer" class="nav-link" data-scroll-target="#cartografía-base-vector-tile-layer"><span class="header-section-number">5.2</span> Cartografía base: Vector Tile Layer</a></li>
+  </ul></li>
+  <li><a href="#integración-en-arcgis-online" id="toc-integración-en-arcgis-online" class="nav-link" data-scroll-target="#integración-en-arcgis-online"><span class="header-section-number">6</span> Integración en ArcGIS Online</a></li>
+  <li><a href="#segundo-momento-creación-de-una-aplicación-web-en-experience-builder" id="toc-segundo-momento-creación-de-una-aplicación-web-en-experience-builder" class="nav-link" data-scroll-target="#segundo-momento-creación-de-una-aplicación-web-en-experience-builder"><span class="header-section-number">7</span> Segundo momento: creación de una aplicación web en Experience Builder</a>
+  <ul class="collapse">
+  <li><a href="#selección-de-plantilla" id="toc-selección-de-plantilla" class="nav-link" data-scroll-target="#selección-de-plantilla"><span class="header-section-number">7.1</span> Selección de plantilla</a></li>
+  <li><a href="#incorporación-del-mapa-web" id="toc-incorporación-del-mapa-web" class="nav-link" data-scroll-target="#incorporación-del-mapa-web"><span class="header-section-number">7.2</span> Incorporación del mapa web</a></li>
+  <li><a href="#diseño-de-interfaz-y-elementos-de-consulta" id="toc-diseño-de-interfaz-y-elementos-de-consulta" class="nav-link" data-scroll-target="#diseño-de-interfaz-y-elementos-de-consulta"><span class="header-section-number">7.3</span> Diseño de interfaz y elementos de consulta</a></li>
+  </ul></li>
+  <li><a href="#análisis-técnico" id="toc-análisis-técnico" class="nav-link" data-scroll-target="#análisis-técnico"><span class="header-section-number">8</span> Análisis técnico</a>
+  <ul class="collapse">
+  <li><a href="#ventajas-de-las-teselas-vectoriales-frente-a-teselas-ráster" id="toc-ventajas-de-las-teselas-vectoriales-frente-a-teselas-ráster" class="nav-link" data-scroll-target="#ventajas-de-las-teselas-vectoriales-frente-a-teselas-ráster"><span class="header-section-number">8.1</span> Ventajas de las teselas vectoriales frente a teselas ráster</a></li>
+  <li><a href="#transformación-de-datos-locales-a-hosted-feature-layer" id="toc-transformación-de-datos-locales-a-hosted-feature-layer" class="nav-link" data-scroll-target="#transformación-de-datos-locales-a-hosted-feature-layer"><span class="header-section-number">8.2</span> Transformación de datos locales a Hosted Feature Layer</a></li>
+  <li><a href="#justificación-del-rango-de-escala-para-drenajes" id="toc-justificación-del-rango-de-escala-para-drenajes" class="nav-link" data-scroll-target="#justificación-del-rango-de-escala-para-drenajes"><span class="header-section-number">8.3</span> Justificación del rango de escala para drenajes</a></li>
+  <li><a href="#interoperabilidad-y-sistemas-de-referencia" id="toc-interoperabilidad-y-sistemas-de-referencia" class="nav-link" data-scroll-target="#interoperabilidad-y-sistemas-de-referencia"><span class="header-section-number">8.4</span> Interoperabilidad y sistemas de referencia</a></li>
+  </ul></li>
+  <li><a href="#conclusiones" id="toc-conclusiones" class="nav-link" data-scroll-target="#conclusiones"><span class="header-section-number">9</span> Conclusiones</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Otros formatos</h2><ul><li><a href="index.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Flujos de trabajo desde ArcGIS Pro hacia ArcGIS Online y creación de una aplicación web</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>Santiago Rodriguez Basabe </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introducción" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introducción</h1>
+<p>Este informe sintetiza el flujo de trabajo desarrollado para llevar información geográfica local desde ArcGIS Pro hacia ArcGIS Online. El ejercicio partió de una base de datos geográfica con capas vectoriales de Colombia y finalizó con la construcción de un mapa web integrado y una aplicación en ArcGIS Experience Builder. El proceso permitió articular tres componentes técnicos: preparación cartográfica en escritorio, publicación de servicios web y diseño de una interfaz de consulta para usuarios finales.</p>
+<p>El trabajo se organizó a partir de una lógica de separación entre cartografía base y capa operativa. La cartografía base se estructuró como un servicio de teselas vectoriales, orientado a la visualización rápida y eficiente en entornos web. La capa de poblaciones se publicó como una capa de entidades alojada, con el fin de conservar capacidades de consulta, edición, exportación y despliegue dinámico de atributos. Esta distinción permitió construir un producto más ordenado: por un lado, una base cartográfica estable; por otro, una capa temática consultable y modificable.</p>
+</section>
+<section id="objetivo-del-trabajo" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Objetivo del trabajo</h1>
+<p>El objetivo general fue implementar un flujo reproducible para publicar datos geográficos locales en ArcGIS Online y utilizarlos como insumo para la creación de un mapa web y una aplicación interactiva. El ejercicio buscó reconocer las diferencias entre los principales tipos de servicios web disponibles en la plataforma, configurar adecuadamente la simbología y los rangos de escala, y preparar una experiencia de visualización que facilitara la consulta de municipios o poblaciones de Colombia.</p>
+<p>De manera específica, el trabajo permitió:</p>
+<ul>
+<li>configurar un proyecto local en ArcGIS Pro con mapas independientes para base cartográfica y capa operativa;</li>
+<li>definir el sistema de referencia del proyecto usando MAGNA-SIRGAS / Origen Nacional, EPSG:9377;</li>
+<li>publicar una capa de entidades alojada para las poblaciones de Colombia;</li>
+<li>publicar una capa de teselas vectoriales para el mapa base nacional;</li>
+<li>integrar ambos servicios en un mapa web dentro de ArcGIS Online;</li>
+<li>construir una aplicación web mediante Experience Builder a partir del mapa publicado.</li>
+</ul>
+</section>
+<section id="preparación-del-proyecto-en-arcgis-pro" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Preparación del proyecto en ArcGIS Pro</h1>
+<p>El primer momento del trabajo consistió en la organización del entorno local. Se creó una estructura de carpetas para separar datos, imágenes, documento Quarto y proyecto de ArcGIS Pro. Esta organización permitió mantener vinculados los archivos del proyecto y facilitó la posterior documentación del procedimiento.</p>
+<p>La base de datos geográfica utilizada contenía capas vectoriales de Colombia, incluyendo departamentos, municipios, poblaciones y drenajes. A partir de estas capas se crearon dos mapas independientes dentro de ArcGIS Pro. El primero, denominado <code>Mapa_Base</code>, se destinó a la publicación de la cartografía de referencia. El segundo, denominado <code>Mapa_Operativo</code>, se utilizó para publicar la capa de poblaciones como servicio de entidades.</p>
+<p>La separación entre ambos mapas respondió a una decisión técnica. Las capas de referencia, como departamentos y drenajes, no requerían edición frecuente y debían comportarse como contexto cartográfico. En cambio, la capa de poblaciones debía conservar capacidades de consulta y atributos asociados. Por esa razón se publicó como <code>Hosted Feature Layer</code>.</p>
+</section>
+<section id="configuración-cartográfica-y-sistema-de-referencia" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Configuración cartográfica y sistema de referencia</h1>
+<p>El proyecto se configuró en MAGNA-SIRGAS / Origen Nacional, EPSG:9377. Esta referencia permitió trabajar con un sistema adecuado para Colombia durante la etapa local de preparación cartográfica. La selección del CRS local favorece la coherencia de las geometrías y evita depender exclusivamente de la reproyección automática que se aplica al publicar en servicios web.</p>
+<p>En el <code>Mapa_Base</code> se incorporaron las capas de departamentos y drenajes. Los departamentos se simbolizaron con tonos neutros para funcionar como soporte visual sin competir con las capas operativas. Los drenajes se representaron con color azul claro y transparencia, y se configuró un rango de escala para evitar saturación visual a escalas nacionales.</p>
+<p>La restricción de escala aplicada a los drenajes respondió a una consideración de legibilidad y rendimiento. Una red hídrica densa puede producir exceso de vértices, sobreposición de líneas y ruido gráfico cuando se observa el mapa a escalas pequeñas. Al limitar su visualización a escalas más detalladas, el mapa conserva mayor claridad y reduce la carga gráfica que debe enviarse al navegador.</p>
+</section>
+<section id="publicación-de-servicios-web" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Publicación de servicios web</h1>
+<section id="capa-operativa-hosted-feature-layer" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="capa-operativa-hosted-feature-layer"><span class="header-section-number">5.1</span> Capa operativa: Hosted Feature Layer</h2>
+<p>La capa de poblaciones fue publicada desde <code>Mapa_Operativo</code> como una capa de entidades alojada. Este tipo de servicio mantiene la información vectorial como entidades consultables y permite trabajar con geometrías, tablas de atributos y ventanas emergentes. Su uso resultó adecuado porque las poblaciones funcionan como capa temática principal del ejercicio.</p>
+<p>Durante la publicación se configuraron los metadatos mínimos del servicio: nombre, resumen, etiquetas y nivel de acceso. También se habilitaron capacidades operativas como sincronización, exportación de datos y servicios compatibles con estándares de interoperabilidad cuando correspondía. Estas opciones determinan qué puede hacer un usuario con la capa una vez publicada en ArcGIS Online.</p>
+</section>
+<section id="cartografía-base-vector-tile-layer" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="cartografía-base-vector-tile-layer"><span class="header-section-number">5.2</span> Cartografía base: Vector Tile Layer</h2>
+<p>El mapa base se publicó como capa de teselas vectoriales. Este formato divide la cartografía en paquetes vectoriales que se transfieren de manera eficiente al cliente web. A diferencia de una tesela ráster, la tesela vectorial no entrega una imagen fija sino geometrías y estilos que pueden adaptarse a distintas resoluciones de pantalla.</p>
+<p>La elección de teselas vectoriales fue pertinente para una cartografía de referencia, porque permite una visualización más liviana, escalable y compatible con navegadores y dispositivos móviles. También facilita el ajuste de estilos sin necesidad de volver a procesar completamente los datos originales.</p>
+</section>
+</section>
+<section id="integración-en-arcgis-online" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Integración en ArcGIS Online</h1>
+<p>Una vez publicados los servicios, se verificó su disponibilidad en el contenido de ArcGIS Online. Luego se creó un mapa web integrando la capa de teselas vectoriales como mapa base y la capa de poblaciones como capa operativa. Esta integración permitió construir un producto cartográfico funcional dentro del ecosistema web de Esri.</p>
+<p>El mapa web se configuró con ventanas emergentes y alias de campos. Esta etapa permitió transformar una capa técnica en una capa más legible para usuarios finales, ya que los nombres de campos internos fueron reemplazados por nombres de visualización más claros. También se revisó el nivel de uso compartido y la información del elemento, incluyendo descripción, etiquetas y términos de uso.</p>
+</section>
+<section id="segundo-momento-creación-de-una-aplicación-web-en-experience-builder" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Segundo momento: creación de una aplicación web en Experience Builder</h1>
+<p>El segundo momento del informe corresponde a la construcción de una aplicación web a partir del mapa publicado. Aunque el flujo general de ArcGIS Online ofrece varias rutas para convertir un mapa web en una aplicación —por ejemplo, Instant Apps, Dashboards, StoryMaps o Experience Builder— en este caso se optó por Experience Builder. Esta opción permitió diseñar una interfaz más flexible, con mayor control sobre la distribución de widgets, textos, paneles y componentes visuales.</p>
+<section id="selección-de-plantilla" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="selección-de-plantilla"><span class="header-section-number">7.1</span> Selección de plantilla</h2>
+<p>El proceso inició con la selección de una plantilla dentro de Experience Builder. La interfaz presentó diferentes opciones predeterminadas, incluyendo plantillas centradas en el mapa, páginas web, sitios y cuadros de mando. Para este ejercicio se utilizó una plantilla que permitiera combinar un mapa principal con paneles laterales, texto descriptivo y elementos de navegación.</p>
+<div id="fig-menu" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-menu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="imagenes/06_menu.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-menu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;1: Selección de plantilla en ArcGIS Experience Builder.
+</figcaption>
+</figure>
+</div>
+<p>La selección de plantilla definió la estructura inicial de la aplicación. En esta etapa no se configuró todavía el contenido definitivo, sino el marco general de la experiencia: disposición de mapa, panel de información, elementos de navegación y zonas editables.</p>
+</section>
+<section id="incorporación-del-mapa-web" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="incorporación-del-mapa-web"><span class="header-section-number">7.2</span> Incorporación del mapa web</h2>
+<p>Después de crear la experiencia, se vinculó el mapa web previamente construido en ArcGIS Online. Este mapa contenía la base cartográfica publicada como teselas vectoriales y la capa operativa de poblaciones. Al incorporarlo en Experience Builder, el mapa dejó de ser únicamente un recurso cartográfico aislado y pasó a formar parte de una interfaz de consulta.</p>
+<div id="fig-creacion" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-creacion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="imagenes/07_creacion_app.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-creacion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;2: Configuración inicial de la experiencia y vinculación del mapa web.
+</figcaption>
+</figure>
+</div>
+<p>En la configuración del widget de mapa se ajustó la vista inicial, el rango de escala y las herramientas disponibles para el usuario. También se revisó la relación entre el mapa y los demás widgets de la página. La aplicación debía permitir la exploración espacial de las poblaciones y, al mismo tiempo, ofrecer una explicación breve del contenido mostrado.</p>
+</section>
+<section id="diseño-de-interfaz-y-elementos-de-consulta" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="diseño-de-interfaz-y-elementos-de-consulta"><span class="header-section-number">7.3</span> Diseño de interfaz y elementos de consulta</h2>
+<p>La experiencia se estructuró con un mapa principal, un panel descriptivo y elementos visuales complementarios. El panel lateral incluyó un título, una descripción del propósito de la aplicación, campos de texto y botones configurables. La intención fue producir una interfaz básica, pero suficiente para demostrar cómo un mapa web puede ser transformado en un producto interactivo.</p>
+<div id="fig-app" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-app-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="imagenes/08_app_basico.png" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-app-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;3: Vista preliminar de la aplicación construida en Experience Builder.
+</figcaption>
+</figure>
+</div>
+<p>El diseño mantuvo una lógica de lectura simple: el usuario observa el mapa, identifica la capa de poblaciones y consulta la información disponible desde los elementos emergentes o herramientas de navegación. El panel lateral funciona como guía contextual y permite presentar la aplicación como un producto terminado, no solo como una vista técnica del mapa.</p>
+</section>
+</section>
+<section id="análisis-técnico" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Análisis técnico</h1>
+<section id="ventajas-de-las-teselas-vectoriales-frente-a-teselas-ráster" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="ventajas-de-las-teselas-vectoriales-frente-a-teselas-ráster"><span class="header-section-number">8.1</span> Ventajas de las teselas vectoriales frente a teselas ráster</h2>
+<p>Las teselas vectoriales ofrecen ventajas mecánicas y de rendimiento frente a servicios tradicionales basados en imágenes. Al transferir geometrías y estilos en lugar de imágenes predibujadas, el volumen de datos puede reducirse y la representación se adapta mejor a pantallas con distintas resoluciones. Esto favorece la visualización en dispositivos móviles y navegadores, especialmente cuando la conexión tiene limitaciones de ancho de banda.</p>
+<p>Otra ventaja es la flexibilidad simbólica. Una tesela ráster entrega una imagen ya renderizada; cualquier cambio de estilo requiere volver a generar el caché. En cambio, una capa de teselas vectoriales permite modificar estilos con mayor agilidad, ya que la representación visual se separa parcialmente de los datos. Esta propiedad resulta útil para mapas base que deben conservar buen rendimiento sin perder capacidad de personalización.</p>
+</section>
+<section id="transformación-de-datos-locales-a-hosted-feature-layer" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="transformación-de-datos-locales-a-hosted-feature-layer"><span class="header-section-number">8.2</span> Transformación de datos locales a Hosted Feature Layer</h2>
+<p>Cuando una capa local de una geodatabase se publica como <code>Hosted Feature Layer</code>, deja de depender del archivo local y pasa a almacenarse en la infraestructura cloud de ArcGIS Online. Las geometrías y atributos son convertidos en un servicio consultable mediante solicitudes web. El usuario ya no accede directamente al shapefile o a la geodatabase original, sino a una representación alojada que puede ser consumida por Map Viewer, Experience Builder, ArcGIS Pro u otras aplicaciones compatibles.</p>
+<p>Durante esta transformación, la plataforma administra la persistencia de atributos, la indexación espacial, la consulta de entidades y la visualización web. Las proyecciones también entran en un flujo de interoperabilidad: los datos pueden estar preparados localmente en MAGNA-SIRGAS / Origen Nacional, pero su despliegue web suele ajustarse al esquema de visualización de ArcGIS Online, basado en Web Mercator para la integración con mapas base y clientes web.</p>
+</section>
+<section id="justificación-del-rango-de-escala-para-drenajes" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="justificación-del-rango-de-escala-para-drenajes"><span class="header-section-number">8.3</span> Justificación del rango de escala para drenajes</h2>
+<p>El rango de escala aplicado a los drenajes buscó controlar la densidad visual de la capa. En una escala nacional, una red hídrica detallada puede generar una representación saturada: demasiadas líneas, intersecciones, vértices y posibles conflictos con etiquetas o símbolos de otras capas. Esto afecta la lectura del mapa y también puede aumentar el volumen de información procesada por el cliente.</p>
+<p>Al restringir la visibilidad de los drenajes a escalas más cercanas, la capa aparece cuando su información puede ser interpretada con mayor detalle. Esta decisión combina criterios cartográficos y criterios de rendimiento. El mapa no muestra todos los elementos en todos los niveles de zoom, sino solo aquellos que aportan información legible para la escala de observación.</p>
+</section>
+<section id="interoperabilidad-y-sistemas-de-referencia" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="interoperabilidad-y-sistemas-de-referencia"><span class="header-section-number">8.4</span> Interoperabilidad y sistemas de referencia</h2>
+<p>El flujo de trabajo combinó un sistema de referencia local para preparación de datos y un entorno web que opera bajo estándares de visualización global. MAGNA-SIRGAS / Origen Nacional es adecuado para mantener consistencia espacial en Colombia durante la etapa de edición y preparación. Web Mercator, por su parte, facilita la integración con servicios web, mapas base globales y aplicaciones de navegación en línea.</p>
+<p>La interoperabilidad depende de que estos sistemas puedan dialogar mediante transformaciones controladas. Al publicar en ArcGIS Online, los datos se integran en una infraestructura que permite su consumo desde múltiples clientes. Esto amplía el alcance del producto cartográfico y evita que el resultado quede restringido a un proyecto local de escritorio.</p>
+</section>
+</section>
+<section id="conclusiones" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Conclusiones</h1>
+<p>El trabajo permitió pasar de un conjunto de capas locales en ArcGIS Pro a un producto web consultable y compartible en ArcGIS Online. La publicación diferenciada de servicios fue el eje técnico del ejercicio: la capa de poblaciones se mantuvo como servicio de entidades para conservar consulta y atributos, mientras que el mapa base se publicó como teselas vectoriales para mejorar el rendimiento de visualización.</p>
+<p>La creación de la aplicación en Experience Builder añadió una capa de comunicación al producto cartográfico. El mapa web se convirtió en una interfaz más completa, con componentes textuales, estructura visual y herramientas de exploración. Este paso mostró que la publicación de datos no termina en el servicio web: requiere también pensar en la experiencia de usuario, la legibilidad de la información y la forma en que el contenido será consultado por terceros.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
